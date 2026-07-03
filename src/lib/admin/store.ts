@@ -228,7 +228,78 @@ export function usePortfolio() {
     setItems((prev) => prev.map((p) => (p.id === id ? { ...p, featured: !p.featured } : p)));
   };
 
-  return { items, loading, refresh, upsert, remove, togglePublished, toggleFeatured };
+  const duplicate = async (id: string) => {
+    const cur = items.find((i) => i.id === id);
+    if (!cur) return;
+    const { id: _i, created_at: _c, updated_at: _u, ...rest } = cur;
+    const { error } = await supabase.from("portfolio").insert({
+      ...rest,
+      title: `${cur.title} (Copy)`,
+      published: false,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Project duplicated");
+    await refresh();
+  };
+
+  const bulkDelete = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    const { error } = await supabase.from("portfolio").delete().in("id", ids);
+    if (error) return toast.error(error.message);
+    toast.success(`Deleted ${ids.length} project${ids.length > 1 ? "s" : ""}`);
+    setItems((prev) => prev.filter((p) => !ids.includes(p.id)));
+  };
+
+  const bulkPublish = async (ids: string[], published: boolean) => {
+    if (ids.length === 0) return;
+    const { error } = await supabase.from("portfolio").update({ published }).in("id", ids);
+    if (error) return toast.error(error.message);
+    toast.success(
+      `${published ? "Published" : "Unpublished"} ${ids.length} project${ids.length > 1 ? "s" : ""}`,
+    );
+    setItems((prev) => prev.map((p) => (ids.includes(p.id) ? { ...p, published } : p)));
+  };
+
+  const reorder = async (orderedIds: string[]) => {
+    setItems((prev) => {
+      const map = new Map(prev.map((p) => [p.id, p]));
+      return orderedIds
+        .map((id, idx) => {
+          const it = map.get(id);
+          return it ? { ...it, display_order: idx } : null;
+        })
+        .filter(Boolean) as PortfolioItem[];
+    });
+    const results = await Promise.all(
+      orderedIds.map((id, idx) =>
+        supabase.from("portfolio").update({ display_order: idx }).eq("id", id),
+      ),
+    );
+    const firstErr = results.find((r) => r.error);
+    if (firstErr?.error) toast.error(firstErr.error.message);
+  };
+
+  const updatePartial = async (id: string, patch: Partial<PortfolioItem>) => {
+    const { id: _i, created_at: _c, updated_at: _u, ...rest } = patch as any;
+    const { error } = await supabase.from("portfolio").update(rest).eq("id", id);
+    if (error) return toast.error(error.message);
+    setItems((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  };
+
+  return {
+    items,
+    loading,
+    refresh,
+    upsert,
+    remove,
+    togglePublished,
+    toggleFeatured,
+    duplicate,
+    bulkDelete,
+    bulkPublish,
+    reorder,
+    updatePartial,
+  };
 }
 
 // ————— Services —————
