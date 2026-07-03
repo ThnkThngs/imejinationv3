@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  ShieldCheck,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAdminAuth } from "@/lib/admin/store";
@@ -22,6 +23,7 @@ const NAV = [
   { to: "/admin/portfolio", label: "Portfolio", icon: Images },
   { to: "/admin/services", label: "Services", icon: Wrench },
   { to: "/admin/content", label: "Homepage", icon: Home },
+  { to: "/admin/users", label: "Admins", icon: ShieldCheck },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ] as const;
 
