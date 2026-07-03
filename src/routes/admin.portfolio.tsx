@@ -522,7 +522,7 @@ function EditorDialog({
   editing: PortfolioItem | null;
   setEditing: (v: PortfolioItem | null) => void;
   onSave: () => void;
-  onAutoSave: (id: string, patch: Partial<PortfolioItem>) => Promise<void>;
+  onAutoSave: (id: string, patch: Partial<PortfolioItem>) => Promise<unknown>;
 }) {
   const [autoSaveState, setAutoSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
