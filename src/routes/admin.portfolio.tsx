@@ -75,6 +75,7 @@ const empty: PortfolioItem = {
   description: "",
   cover_image: "",
   gallery_images: [],
+  media: [],
   published: false,
   featured: false,
   display_order: 0,
