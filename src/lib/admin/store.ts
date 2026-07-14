@@ -188,12 +188,13 @@ export function usePortfolio() {
 
   const upsert = async (item: PortfolioItem) => {
     const { id, created_at, updated_at, ...rest } = item;
+    const payload = rest as unknown as Record<string, unknown>;
     if (id && items.some((i) => i.id === id)) {
-      const { error } = await supabase.from("portfolio").update(rest).eq("id", id);
+      const { error } = await supabase.from("portfolio").update(payload).eq("id", id);
       if (error) return toast.error(error.message);
       toast.success("Project updated");
     } else {
-      const { error } = await supabase.from("portfolio").insert(rest);
+      const { error } = await supabase.from("portfolio").insert(payload as any);
       if (error) return toast.error(error.message);
       toast.success("Project created");
     }
