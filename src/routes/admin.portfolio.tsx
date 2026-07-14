@@ -61,7 +61,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { usePortfolio } from "@/lib/admin/store";
-import type { PortfolioItem } from "@/lib/admin/mock-data";
+import { MediaUploader } from "@/components/admin/MediaUploader";
+import type { MediaItem, PortfolioItem } from "@/lib/admin/mock-data";
 
 export const Route = createFileRoute("/admin/portfolio")({
   component: PortfolioAdmin,
@@ -75,6 +76,7 @@ const empty: PortfolioItem = {
   description: "",
   cover_image: "",
   gallery_images: [],
+  media: [],
   published: false,
   featured: false,
   display_order: 0,
@@ -552,7 +554,8 @@ function EditorDialog({
       initial.published !== editing.published ||
       initial.featured !== editing.featured ||
       JSON.stringify(initial.gallery_images ?? []) !==
-        JSON.stringify(editing.gallery_images ?? []);
+        JSON.stringify(editing.gallery_images ?? []) ||
+      JSON.stringify(initial.media ?? []) !== JSON.stringify(editing.media ?? []);
     if (!changed) return;
 
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -566,6 +569,7 @@ function EditorDialog({
         description: snapshot.description,
         cover_image: snapshot.cover_image,
         gallery_images: snapshot.gallery_images,
+        media: snapshot.media,
         published: snapshot.published,
         featured: snapshot.featured,
         display_order: snapshot.display_order,
@@ -630,30 +634,28 @@ function EditorDialog({
                 rows={3}
               />
             </div>
-            <FieldInput
-              label="Cover image URL"
-              value={editing.cover_image ?? ""}
-              onChange={(v) => setEditing({ ...editing, cover_image: v })}
-              placeholder="https://…"
-            />
             <div className="space-y-2">
-              <Label className="text-white/70">Gallery images (one URL per line)</Label>
-              <Textarea
-                value={(editing.gallery_images ?? []).join("\n")}
-                onChange={(e) =>
+              <Label className="text-white/70">Media (photos & videos)</Label>
+              <MediaUploader
+                media={editing.media ?? []}
+                onChange={(next: MediaItem[]) =>
                   setEditing({
                     ...editing,
-                    gallery_images: e.target.value
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
+                    media: next,
+                    // Keep legacy gallery_images URLs in sync with images only, for backwards-compat readers
+                    gallery_images: next.filter((m) => m.type === "image").map((m) => m.url),
+                    // Auto-assign cover if none set
+                    cover_image:
+                      editing.cover_image && next.some((m) => m.url === editing.cover_image)
+                        ? editing.cover_image
+                        : next.find((m) => m.type === "image")?.url ?? next[0]?.url ?? "",
                   })
                 }
-                className="border-white/10 bg-white/[0.03] text-white"
-                rows={4}
-                placeholder="https://…"
+                coverUrl={editing.cover_image}
+                onCoverChange={(url) => setEditing({ ...editing, cover_image: url })}
               />
             </div>
+
             <div className="space-y-2">
               <Label className="text-white/70">Display order</Label>
               <Input
@@ -753,16 +755,27 @@ function PreviewDialog({
                   className="mt-8 w-full rounded-md object-cover"
                 />
               )}
-              {(previewing.gallery_images ?? []).length > 0 && (
+              {(previewing.media ?? []).length > 0 && (
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  {previewing.gallery_images.map((src, i) => (
-                    <img
-                      key={`${src}-${i}`}
-                      src={src}
-                      alt={`${previewing.title} gallery ${i + 1}`}
-                      className="w-full rounded-md object-cover"
-                    />
-                  ))}
+                  {previewing.media.map((m, i) =>
+                    m.type === "video" ? (
+                      <video
+                        key={`${m.url}-${i}`}
+                        src={m.url}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="w-full rounded-md"
+                      />
+                    ) : (
+                      <img
+                        key={`${m.url}-${i}`}
+                        src={m.url}
+                        alt={`${previewing.title} gallery ${i + 1}`}
+                        className="w-full rounded-md object-cover"
+                      />
+                    ),
+                  )}
                 </div>
               )}
             </div>

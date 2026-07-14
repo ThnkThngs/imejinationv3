@@ -178,7 +178,7 @@ export function usePortfolio() {
       setLoading(false);
       return;
     }
-    setItems((data ?? []) as PortfolioItem[]);
+    setItems(((data ?? []) as unknown) as PortfolioItem[]);
     setLoading(false);
   }, []);
 
@@ -188,12 +188,13 @@ export function usePortfolio() {
 
   const upsert = async (item: PortfolioItem) => {
     const { id, created_at, updated_at, ...rest } = item;
+    const payload = rest as any;
     if (id && items.some((i) => i.id === id)) {
-      const { error } = await supabase.from("portfolio").update(rest).eq("id", id);
+      const { error } = await supabase.from("portfolio").update(payload).eq("id", id);
       if (error) return toast.error(error.message);
       toast.success("Project updated");
     } else {
-      const { error } = await supabase.from("portfolio").insert(rest);
+      const { error } = await supabase.from("portfolio").insert(payload);
       if (error) return toast.error(error.message);
       toast.success("Project created");
     }
@@ -236,7 +237,7 @@ export function usePortfolio() {
       ...rest,
       title: `${cur.title} (Copy)`,
       published: false,
-    });
+    } as any);
     if (error) return toast.error(error.message);
     toast.success("Project duplicated");
     await refresh();

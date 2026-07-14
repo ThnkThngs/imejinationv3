@@ -1,41 +1,33 @@
 import { useEffect, useState } from "react";
 import { ShutterImage } from "./ShutterImage";
 import { supabase } from "@/integrations/supabase/client";
-import type { PortfolioItem } from "@/lib/admin/mock-data";
+import type { PortfolioItem, MediaItem } from "@/lib/admin/mock-data";
 
 export function Portfolio() {
   const [projects, setProjects] = useState<PortfolioItem[]>([]);
 
   useEffect(() => {
     let mounted = true;
-    supabase
-      .from("portfolio")
-      .select("*")
-      .eq("published", true)
-      .order("display_order", { ascending: true })
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (!mounted || error) return;
-        setProjects((data ?? []) as PortfolioItem[]);
-      });
+    const load = () => {
+      supabase
+        .from("portfolio")
+        .select("*")
+        .eq("published", true)
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false })
+        .then(({ data, error }) => {
+          if (!mounted || error) return;
+          setProjects((data ?? []) as unknown as PortfolioItem[]);
+        });
+    };
+    load();
 
     const channel = supabase
       .channel("portfolio-public")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "portfolio" },
-        () => {
-          supabase
-            .from("portfolio")
-            .select("*")
-            .eq("published", true)
-            .order("display_order", { ascending: true })
-            .order("created_at", { ascending: false })
-            .then(({ data }) => {
-              if (!mounted) return;
-              setProjects((data ?? []) as PortfolioItem[]);
-            });
-        },
+        () => load(),
       )
       .subscribe();
 
@@ -69,13 +61,14 @@ export function Portfolio() {
         ) : (
           <div className="space-y-24 md:space-y-32">
             {projects.map((p, i) => {
-              const gallery = (p.gallery_images ?? []).filter(Boolean);
-              const images = gallery.length > 0
-                ? gallery.slice(0, 3)
-                : p.cover_image
-                  ? [p.cover_image]
-                  : [];
-              const cols = images.length >= 3 ? "md:grid-cols-3" : images.length === 2 ? "md:grid-cols-2" : "md:grid-cols-1";
+              const mediaList = mediaFor(p);
+              const shown = mediaList.slice(0, 3);
+              const cols =
+                shown.length >= 3
+                  ? "md:grid-cols-3"
+                  : shown.length === 2
+                    ? "md:grid-cols-2"
+                    : "md:grid-cols-1";
               return (
                 <article key={p.id} className="grid grid-cols-12 gap-4 md:gap-6">
                   <header className="col-span-12 md:col-span-3 md:pt-2">
@@ -98,16 +91,27 @@ export function Portfolio() {
                   </header>
 
                   <div className={`col-span-12 grid gap-4 md:col-span-9 md:gap-6 ${cols}`}>
-                    {images.map((src, idx) => (
+                    {shown.map((m, idx) => (
                       <figure
-                        key={`${src}-${idx}`}
+                        key={`${m.url}-${idx}`}
                         className="group relative aspect-[4/5] overflow-hidden bg-card"
                       >
-                        <ShutterImage
-                          src={src}
-                          alt={`${p.title} — image ${idx + 1}`}
-                          className="tile h-full w-full object-cover"
-                        />
+                        {m.type === "video" ? (
+                          <video
+                            src={m.url}
+                            poster={m.poster ?? undefined}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="tile h-full w-full object-cover"
+                          />
+                        ) : (
+                          <ShutterImage
+                            src={m.url}
+                            alt={`${p.title} — image ${idx + 1}`}
+                            className="tile h-full w-full object-cover"
+                          />
+                        )}
                         <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-black/80 to-transparent px-5 py-4 text-xs uppercase tracking-[0.2em] text-primary opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
                           {p.title}
                         </figcaption>
@@ -122,4 +126,19 @@ export function Portfolio() {
       </div>
     </section>
   );
+}
+
+function inferKind(url: string): "image" | "video" {
+  const clean = url.split("?")[0].toLowerCase();
+  if (/\.(mp4|webm|mov|m4v|ogv)$/.test(clean)) return "video";
+  return "image";
+}
+
+function mediaFor(p: PortfolioItem): MediaItem[] {
+  const list: MediaItem[] = Array.isArray(p.media) ? p.media : [];
+  if (list.length > 0) return list;
+  // Legacy fallback
+  const gallery = (p.gallery_images ?? []).filter(Boolean);
+  const urls = gallery.length > 0 ? gallery : p.cover_image ? [p.cover_image] : [];
+  return urls.map((url) => ({ url, type: inferKind(url) }));
 }

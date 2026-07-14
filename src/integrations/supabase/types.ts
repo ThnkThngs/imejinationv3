@@ -124,6 +124,7 @@ export type Database = {
           gallery_images: string[]
           id: string
           location: string | null
+          media: Json
           published: boolean
           title: string
           updated_at: string
@@ -138,6 +139,7 @@ export type Database = {
           gallery_images?: string[]
           id?: string
           location?: string | null
+          media?: Json
           published?: boolean
           title: string
           updated_at?: string
@@ -152,6 +154,7 @@ export type Database = {
           gallery_images?: string[]
           id?: string
           location?: string | null
+          media?: Json
           published?: boolean
           title?: string
           updated_at?: string
