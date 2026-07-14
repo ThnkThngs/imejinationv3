@@ -178,7 +178,7 @@ export function usePortfolio() {
       setLoading(false);
       return;
     }
-    setItems((data ?? []) as PortfolioItem[]);
+    setItems(((data ?? []) as unknown) as PortfolioItem[]);
     setLoading(false);
   }, []);
 
