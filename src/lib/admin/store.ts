@@ -237,7 +237,7 @@ export function usePortfolio() {
       ...rest,
       title: `${cur.title} (Copy)`,
       published: false,
-    });
+    } as any);
     if (error) return toast.error(error.message);
     toast.success("Project duplicated");
     await refresh();
