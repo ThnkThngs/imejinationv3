@@ -61,7 +61,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { usePortfolio } from "@/lib/admin/store";
-import type { PortfolioItem } from "@/lib/admin/mock-data";
+import { MediaUploader } from "@/components/admin/MediaUploader";
+import type { MediaItem, PortfolioItem } from "@/lib/admin/mock-data";
 
 export const Route = createFileRoute("/admin/portfolio")({
   component: PortfolioAdmin,
