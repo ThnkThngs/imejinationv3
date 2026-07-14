@@ -31,6 +31,13 @@ export interface Brief {
   created_at: string;
 }
 
+export interface MediaItem {
+  url: string;
+  type: "image" | "video";
+  name?: string;
+  poster?: string;
+}
+
 export interface PortfolioItem {
   id: string;
   title: string;
@@ -39,6 +46,7 @@ export interface PortfolioItem {
   description: string | null;
   cover_image: string | null;
   gallery_images: string[];
+  media: MediaItem[];
   published: boolean;
   featured: boolean;
   display_order: number;
