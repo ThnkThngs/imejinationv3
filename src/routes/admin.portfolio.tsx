@@ -755,16 +755,27 @@ function PreviewDialog({
                   className="mt-8 w-full rounded-md object-cover"
                 />
               )}
-              {(previewing.gallery_images ?? []).length > 0 && (
+              {(previewing.media ?? []).length > 0 && (
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  {previewing.gallery_images.map((src, i) => (
-                    <img
-                      key={`${src}-${i}`}
-                      src={src}
-                      alt={`${previewing.title} gallery ${i + 1}`}
-                      className="w-full rounded-md object-cover"
-                    />
-                  ))}
+                  {previewing.media.map((m, i) =>
+                    m.type === "video" ? (
+                      <video
+                        key={`${m.url}-${i}`}
+                        src={m.url}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="w-full rounded-md"
+                      />
+                    ) : (
+                      <img
+                        key={`${m.url}-${i}`}
+                        src={m.url}
+                        alt={`${previewing.title} gallery ${i + 1}`}
+                        className="w-full rounded-md object-cover"
+                      />
+                    ),
+                  )}
                 </div>
               )}
             </div>
