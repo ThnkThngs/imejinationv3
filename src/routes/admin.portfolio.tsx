@@ -554,7 +554,8 @@ function EditorDialog({
       initial.published !== editing.published ||
       initial.featured !== editing.featured ||
       JSON.stringify(initial.gallery_images ?? []) !==
-        JSON.stringify(editing.gallery_images ?? []);
+        JSON.stringify(editing.gallery_images ?? []) ||
+      JSON.stringify(initial.media ?? []) !== JSON.stringify(editing.media ?? []);
     if (!changed) return;
 
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -568,6 +569,7 @@ function EditorDialog({
         description: snapshot.description,
         cover_image: snapshot.cover_image,
         gallery_images: snapshot.gallery_images,
+        media: snapshot.media,
         published: snapshot.published,
         featured: snapshot.featured,
         display_order: snapshot.display_order,
