@@ -632,30 +632,28 @@ function EditorDialog({
                 rows={3}
               />
             </div>
-            <FieldInput
-              label="Cover image URL"
-              value={editing.cover_image ?? ""}
-              onChange={(v) => setEditing({ ...editing, cover_image: v })}
-              placeholder="https://…"
-            />
             <div className="space-y-2">
-              <Label className="text-white/70">Gallery images (one URL per line)</Label>
-              <Textarea
-                value={(editing.gallery_images ?? []).join("\n")}
-                onChange={(e) =>
+              <Label className="text-white/70">Media (photos & videos)</Label>
+              <MediaUploader
+                media={editing.media ?? []}
+                onChange={(next: MediaItem[]) =>
                   setEditing({
                     ...editing,
-                    gallery_images: e.target.value
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
+                    media: next,
+                    // Keep legacy gallery_images URLs in sync with images only, for backwards-compat readers
+                    gallery_images: next.filter((m) => m.type === "image").map((m) => m.url),
+                    // Auto-assign cover if none set
+                    cover_image:
+                      editing.cover_image && next.some((m) => m.url === editing.cover_image)
+                        ? editing.cover_image
+                        : next.find((m) => m.type === "image")?.url ?? next[0]?.url ?? "",
                   })
                 }
-                className="border-white/10 bg-white/[0.03] text-white"
-                rows={4}
-                placeholder="https://…"
+                coverUrl={editing.cover_image}
+                onCoverChange={(url) => setEditing({ ...editing, cover_image: url })}
               />
             </div>
+
             <div className="space-y-2">
               <Label className="text-white/70">Display order</Label>
               <Input
