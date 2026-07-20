@@ -141,6 +141,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    overflow-x: hidden;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -151,6 +152,7 @@
   }
 
   html {
+    overflow-x: hidden;
     scroll-behavior: smooth;
   }
 }
