@@ -1,9 +1,12 @@
-import heroImg from "@/assets/hero-aerial.jpg";
+import heroVideo from "@/assets/hero-montage.mp4";
+import heroPoster from "@/assets/hero-montage-poster.jpg";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function Hero() {
   const heroRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -18,7 +21,7 @@ export function Hero() {
       const { top, height } = hero.getBoundingClientRect();
       const progress = Math.max(0, Math.min(-top, height));
 
-      hero.style.setProperty("--hero-image-y", `${progress * -0.16}px`);
+      hero.style.setProperty("--hero-video-y", `${progress * -0.16}px`);
       hero.style.setProperty("--hero-light-y", `${progress * -0.28}px`);
       hero.style.setProperty("--hero-content-y", `${progress * -0.08}px`);
       hero.style.setProperty("--hero-cue-y", `${progress * 0.12}px`);
@@ -40,12 +43,59 @@ export function Hero() {
     };
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    if (!video) return;
+
+    const syncMotionPreference = () => {
+      if (reducedMotion.matches) {
+        video.pause();
+        setIsPaused(true);
+        return;
+      }
+
+      void video.play().catch(() => setIsPaused(true));
+    };
+
+    syncMotionPreference();
+    reducedMotion.addEventListener("change", syncMotionPreference);
+
+    return () => reducedMotion.removeEventListener("change", syncMotionPreference);
+  }, []);
+
+  const togglePlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      void video.play().catch(() => setIsPaused(true));
+    } else {
+      video.pause();
+    }
+  };
+
   return (
-    <section ref={heroRef} id="top" className="relative h-screen min-h-[700px] w-full overflow-hidden">
-      <img
-        src={heroImg}
-        alt="Cinematic aerial photograph of a lakeside property at twilight"
-        className="absolute inset-0 h-[116%] w-full object-cover will-change-transform motion-reduce:transform-none [transform:translate3d(0,calc(-8%_+_var(--hero-image-y,0px)),0)_scale(1.08)]"
+    <section
+      ref={heroRef}
+      id="top"
+      className="relative h-screen min-h-[700px] w-full overflow-hidden"
+    >
+      <video
+        ref={videoRef}
+        src={heroVideo}
+        poster={heroPoster}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        tabIndex={-1}
+        onPlay={() => setIsPaused(false)}
+        onPause={() => setIsPaused(true)}
+        className="absolute inset-0 h-[116%] w-full object-cover will-change-transform motion-reduce:transform-none [transform:translate3d(0,calc(-8%_+_var(--hero-video-y,0px)),0)_scale(1.08)]"
       />
       {/* Cinematic gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black" />
@@ -70,8 +120,8 @@ export function Hero() {
             className="fade-up in-view mt-8 max-w-xl text-base font-light leading-relaxed text-white/80 md:text-lg"
             style={{ animationDelay: "0.2s" }}
           >
-            Elevating properties with stunning aerial and ground perspectives.
-            See beyond the blueprint.
+            Elevating properties with stunning aerial and ground perspectives. See beyond the
+            blueprint.
           </p>
           <div
             className="fade-up in-view mt-10 flex flex-wrap items-center gap-4"
@@ -98,6 +148,25 @@ export function Hero() {
       <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 will-change-transform motion-reduce:transform-none [transform:translate3d(-50%,var(--hero-cue-y,0px),0)]">
         <div className="h-12 w-px animate-pulse bg-gradient-to-b from-transparent via-primary to-transparent" />
       </div>
+
+      <button
+        type="button"
+        onClick={togglePlayback}
+        aria-label={isPaused ? "Play hero video" : "Pause hero video"}
+        aria-pressed={isPaused}
+        className="absolute bottom-7 right-6 z-20 grid h-11 w-11 place-items-center border border-white/25 bg-black/30 text-white backdrop-blur-md transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black md:right-12"
+      >
+        {isPaused ? (
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+            <path d="M8 5.8v12.4a1 1 0 0 0 1.53.85l9.5-6.2a1 1 0 0 0 0-1.7l-9.5-6.2A1 1 0 0 0 8 5.8Z" />
+          </svg>
+        ) : (
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+            <rect x="6" y="5" width="4" height="14" rx="0.75" />
+            <rect x="14" y="5" width="4" height="14" rx="0.75" />
+          </svg>
+        )}
+      </button>
     </section>
   );
 }
