@@ -58,7 +58,7 @@ export function Services() {
         </div>
 
         <div className="mt-12 grid items-stretch gap-8 md:mt-16 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-12">
-          <div className="order-2 border-t border-white/10 lg:order-1" role="list">
+          <div className="border-t border-white/10" role="list">
             {services.map((service, index) => {
               const isActive = index === activeService;
               return (
@@ -104,19 +104,40 @@ export function Services() {
                     }`}
                   >
                     <div className="overflow-hidden">
-                      <div className="pb-7 pl-10 md:pl-12">
-                        <p className="max-w-md text-sm leading-relaxed text-white/60">
-                          {service.desc}
-                        </p>
-                        <Link
-                          to="/brief"
-                          search={{ type: service.type }}
-                          tabIndex={isActive ? 0 : -1}
-                          className="mt-5 inline-flex items-center gap-2 border-b border-primary/40 pb-1 text-xs uppercase tracking-[0.25em] text-primary transition-all hover:gap-3 hover:border-primary"
-                        >
-                          Start a brief
-                          <span aria-hidden>→</span>
-                        </Link>
+                      <div className="pb-7">
+                        <figure className="relative mb-6 aspect-[4/3] overflow-hidden bg-card lg:hidden">
+                          <img
+                            src={service.image}
+                            alt={service.alt}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-full object-cover brightness-90"
+                          />
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+                          <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5">
+                            <span className="font-display text-lg font-light text-white">
+                              {service.title}
+                            </span>
+                            <span className="font-display text-[10px] text-white/60">
+                              {String(index + 1).padStart(2, "0")} /{" "}
+                              {String(services.length).padStart(2, "0")}
+                            </span>
+                          </figcaption>
+                        </figure>
+                        <div className="pl-10 md:pl-12">
+                          <p className="max-w-md text-sm leading-relaxed text-white/60">
+                            {service.desc}
+                          </p>
+                          <Link
+                            to="/brief"
+                            search={{ type: service.type }}
+                            tabIndex={isActive ? 0 : -1}
+                            className="mt-5 inline-flex items-center gap-2 border-b border-primary/40 pb-1 text-xs uppercase tracking-[0.25em] text-primary transition-all hover:gap-3 hover:border-primary"
+                          >
+                            Start a brief
+                            <span aria-hidden>→</span>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -125,7 +146,7 @@ export function Services() {
             })}
           </div>
 
-          <figure className="group relative order-1 min-h-[360px] overflow-hidden bg-card lg:order-2 lg:min-h-[620px]">
+          <figure className="group relative hidden min-h-[620px] overflow-hidden bg-card lg:block">
             {services.map((service, index) => (
               <img
                 key={service.type}
