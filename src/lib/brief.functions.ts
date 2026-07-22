@@ -108,12 +108,13 @@ export const generateBrief = createServerFn({ method: "POST" })
       return { recommendation: text, leadId: lead?.id ?? null };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
+      console.error("[generateBrief] unexpected error:", msg);
       if (msg.includes("429")) {
         throw new Error("AI is busy right now — please try again in a moment.");
       }
       if (msg.includes("402")) {
         throw new Error("AI credits exhausted. Please add credits in your Lovable workspace.");
       }
-      throw new Error(`Couldn't generate the brief: ${msg}`);
+      throw new Error("An unexpected error occurred. Please try again later.");
     }
   });
