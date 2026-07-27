@@ -33,8 +33,8 @@ function Index() {
       <Nav />
       <main>
         <Hero />
-        <Services />
         <Portfolio />
+        <Services />
         <Social />
       </main>
       <Footer />
