@@ -19,9 +19,11 @@ export default defineTool({
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   handler: async ({ project_id, ...fields }, ctx) => {
     if (!ctx.isAuthenticated()) return unauthenticated();
-    const patch = Object.fromEntries(
-      Object.entries(fields).filter(([, v]) => v !== undefined),
-    );
+    const patch: Record<string, string | boolean> = {};
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined) patch[key] = value;
+    }
+
     if (Object.keys(patch).length === 0) return failure("Provide at least one field to update.");
     const { data, error } = await supabaseForUser(ctx)
       .from("portfolio")
