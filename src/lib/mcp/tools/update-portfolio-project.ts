@@ -1,6 +1,8 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
+import type { Database } from "@/integrations/supabase/types";
 import { failure, ok, supabaseForUser, unauthenticated } from "../supabase";
+
 
 export default defineTool({
   name: "update_portfolio_project",
