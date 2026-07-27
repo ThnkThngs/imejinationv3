@@ -211,7 +211,7 @@ export function Portfolio() {
           </div>
 
           <div
-            className="mt-10 flex gap-5 overflow-x-auto border-b border-white/10 md:mt-12 md:gap-6"
+            className="mt-10 flex gap-2 overflow-x-auto border-b border-white/10 pb-3 md:mt-12 md:gap-3"
             role="tablist"
             aria-label="Portfolio archive categories"
           >
@@ -228,17 +228,15 @@ export function Portfolio() {
                   setArchiveGroup(index);
                   setLightboxIndex(null);
                 }}
-                className={`relative shrink-0 pb-4 text-[11px] uppercase tracking-[0.22em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                  archiveGroup === index ? "text-primary" : "text-white/45 hover:text-white"
+                className={`group relative shrink-0 border px-4 py-3 text-[10px] uppercase tracking-[0.22em] transition-[background-color,border-color,color] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black md:px-5 md:text-[11px] ${
+                  archiveGroup === index
+                    ? "border-primary bg-primary text-black hover:border-transparent hover:bg-transparent hover:text-primary"
+                    : "border-white/30 bg-white text-black hover:border-transparent hover:bg-transparent hover:text-white"
                 }`}
               >
                 <span className="md:hidden">{group.shortLabel}</span>
                 <span className="hidden md:inline">{group.label}</span>
-                <span
-                  className={`absolute inset-x-0 bottom-0 h-px bg-primary transition-transform duration-500 motion-reduce:transition-none ${
-                    archiveGroup === index ? "scale-x-100" : "scale-x-0"
-                  }`}
-                />
+                <span className="absolute inset-x-0 -bottom-px h-px scale-x-0 bg-primary transition-transform duration-300 motion-reduce:transition-none group-hover:scale-x-100 group-focus-visible:scale-x-100" />
               </button>
             ))}
           </div>
