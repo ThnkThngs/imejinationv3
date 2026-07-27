@@ -60,7 +60,13 @@ function LoginPage() {
       setError("This account does not have admin access.");
       return;
     }
+    const target = safeNext(next);
+    if (target) {
+      window.location.href = target;
+      return;
+    }
     navigate({ to: "/admin/dashboard" });
+
   }
 
   return (
