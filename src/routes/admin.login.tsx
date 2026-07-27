@@ -9,6 +9,9 @@ import { checkIsAdmin } from "@/lib/admin/store";
 
 export const Route = createFileRoute("/admin/login")({
   ssr: false,
+  validateSearch: (s: Record<string, unknown>): { next?: string } =>
+    typeof s.next === "string" ? { next: s.next } : {},
+
   head: () => ({
     meta: [
       { title: "Admin sign in · Imejination" },
@@ -18,8 +21,16 @@ export const Route = createFileRoute("/admin/login")({
   component: LoginPage,
 });
 
+/** Only same-origin relative paths are accepted as a post-login redirect. */
+function safeNext(next?: string) {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
 function LoginPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +60,13 @@ function LoginPage() {
       setError("This account does not have admin access.");
       return;
     }
+    const target = safeNext(next);
+    if (target) {
+      window.location.href = target;
+      return;
+    }
     navigate({ to: "/admin/dashboard" });
+
   }
 
   return (

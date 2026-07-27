@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ofotnpnluxonwzblbign.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "imejination-mcp",
+      "version": "0.1.0",
+      "title": "Imejination Studio"
+    },
+    "tools": [
+      {
+        "name": "list_portfolio",
+        "title": "List portfolio projects",
+        "description": "List Imejination portfolio projects with title, category, location, description and publish state.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "published_only": {
+              "description": "Only return published projects. Defaults to false (all visible projects).",
+              "type": "boolean"
+            },
+            "limit": {
+              "description": "Max projects to return (default 25, max 100).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_portfolio_project",
+        "title": "Update portfolio project",
+        "description": "Update editable fields of a portfolio project (title, category, location, description, published, featured). Admin only.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "project_id": {
+              "type": "string",
+              "description": "The project's UUID, from list_portfolio."
+            },
+            "title": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "published": {
+              "type": "boolean"
+            },
+            "featured": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "project_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_services",
+        "title": "List services",
+        "description": "List the studio's service offerings (title, description, publish state, order).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "published_only": {
+              "description": "Only return published services.",
+              "type": "boolean"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_leads",
+        "title": "List client leads",
+        "description": "List client enquiries and AI brief submissions. Requires an admin account — non-admins get no rows.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filter by status: New, In Review, Won, Lost, Archived.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Max leads to return (default 20, max 100).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_lead_status",
+        "title": "Update lead status",
+        "description": "Change the pipeline status of a lead (New, In Review, Won, Lost, Archived). Admin only.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "lead_id": {
+              "type": "string",
+              "description": "The lead's UUID, from list_leads."
+            },
+            "status": {
+              "type": "string",
+              "description": "New status: one of New, In Review, Won, Lost, Archived."
+            }
+          },
+          "required": [
+            "lead_id",
+            "status"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_homepage_content",
+        "title": "Get homepage content",
+        "description": "Read the editable homepage copy: hero title, subtitle, CTA, about text and stats.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
