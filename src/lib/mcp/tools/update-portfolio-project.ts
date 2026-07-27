@@ -19,15 +19,19 @@ export default defineTool({
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   handler: async ({ project_id, ...fields }, ctx) => {
     if (!ctx.isAuthenticated()) return unauthenticated();
-    const patch: Record<string, string | boolean> = {};
-    for (const [key, value] of Object.entries(fields)) {
-      if (value !== undefined) patch[key] = value;
-    }
+    const patch: Database["public"]["Tables"]["portfolio"]["Update"] = {};
+    if (fields.title !== undefined) patch.title = fields.title;
+    if (fields.category !== undefined) patch.category = fields.category;
+    if (fields.location !== undefined) patch.location = fields.location;
+    if (fields.description !== undefined) patch.description = fields.description;
+    if (fields.published !== undefined) patch.published = fields.published;
+    if (fields.featured !== undefined) patch.featured = fields.featured;
 
     if (Object.keys(patch).length === 0) return failure("Provide at least one field to update.");
     const { data, error } = await supabaseForUser(ctx)
       .from("portfolio")
       .update(patch)
+
       .eq("id", project_id)
       .select("id,title,category,published,featured")
       .maybeSingle();
